@@ -1,6 +1,6 @@
 package com.example.jwt.service;
 
-import com.example.jwt.dto.CustomUserDetails;
+import com.example.jwt.dto.member.CustomUserDetails;
 import com.example.jwt.entity.Member;
 import com.example.jwt.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;

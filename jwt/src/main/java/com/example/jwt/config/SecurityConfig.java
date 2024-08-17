@@ -1,8 +1,9 @@
 package com.example.jwt.config;
 
-import com.example.jwt.jwt.JwtFilter;
+import com.example.jwt.jwt.filter.JwtExceptionFilter;
+import com.example.jwt.jwt.filter.JwtFilter;
 import com.example.jwt.jwt.JwtUtil;
-import com.example.jwt.jwt.LoginFilter;
+import com.example.jwt.jwt.filter.LoginFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,6 +32,13 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
 
     @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web.ignoring()
+                // Custom 예외처리를 위해 /error 경로는 ignore
+                .requestMatchers("/error");
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 // api 방식은 session이 stateless이기 때문에 csrf 방어 필요 없음
@@ -42,18 +51,15 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
 
                 // Cors 설정
-                .cors((corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
-                    @Override
-                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                        CorsConfiguration configuration = new CorsConfiguration();
-                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-                        configuration.setAllowedMethods(Collections.singletonList("*"));
-                        configuration.setAllowCredentials(true);
-                        configuration.setAllowedHeaders(Collections.singletonList("*"));
-                        configuration.setMaxAge(3600L);
-                        configuration.setExposedHeaders(Collections.singletonList("Authorization"));
-                        return configuration;
-                    }
+                .cors((cors -> cors.configurationSource(request -> {
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                    configuration.setAllowedMethods(Collections.singletonList("*"));
+                    configuration.setAllowCredentials(true);
+                    configuration.setAllowedHeaders(Collections.singletonList("*"));
+                    configuration.setMaxAge(3600L);
+                    configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+                    return configuration;
                 })))
 
                 .authorizeHttpRequests(auth -> auth
@@ -64,11 +70,12 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // addFilterBefore : 특정 필터의 전에 실행
-                .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
-
                 // addFilterAt : 특정 필터를 선택해서 원하는 custom 필터로 대체
                 .addFilterAt(new LoginFilter(jwtUtil, authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class)
+
+                // addFilterBefore : 특정 필터의 전에 실행
+                .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
+                .addFilterBefore(new JwtExceptionFilter(), JwtFilter.class)
                 .build();
     }
 

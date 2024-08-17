@@ -1,4 +1,4 @@
-package com.example.jwt.dto;
+package com.example.jwt.dto.member;
 
 import com.example.jwt.entity.Member;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +7,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
@@ -17,12 +16,7 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> collection = new ArrayList<>();
-        collection.add(new GrantedAuthority() {
-            @Override
-            public String getAuthority() {
-                return member.getRole();
-            }
-        });
+        collection.add((GrantedAuthority) member::getRole);
 
         return collection;
     }

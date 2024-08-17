@@ -1,7 +1,8 @@
 package com.example.jwt.service;
 
-import com.example.jwt.dto.JoinDto;
+import com.example.jwt.dto.member.JoinDto;
 import com.example.jwt.entity.Member;
+import com.example.jwt.error.exception.DuplicateNameException;
 import com.example.jwt.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,13 +18,11 @@ public class AuthService {
     public void join(JoinDto joinDto) {
         String name = joinDto.getName();
         if (memberRepository.existsByName(name)) {
-            // 예외처리 작성
-            System.out.printf("%s user already exists!\n", name);
-            return;
+            throw new DuplicateNameException("Name " + name + " is duplicated");
         }
 
         memberRepository.save(Member.builder()
-                .name(name)
+                .name(joinDto.getName())
                 .password(passwordEncoder.encode(joinDto.getPassword()))
                 .role("ROLE_USER")
                 .build());

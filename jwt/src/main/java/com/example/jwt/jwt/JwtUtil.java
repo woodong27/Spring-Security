@@ -1,6 +1,11 @@
 package com.example.jwt.jwt;
 
+import com.example.jwt.error.exception.JwtAuthenticationException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.SecurityException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,16 +23,21 @@ public class JwtUtil {
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
-    public String getName(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("name", String.class);
-    }
-
-    public String getRole(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
-    }
-
-    public Boolean isExpired(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+    public JwtPayload verify(String token) {
+        try {
+            Jws<Claims> jwsClaims = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
+            Claims payload = jwsClaims.getPayload();
+            return JwtPayload.builder()
+                    .name(payload.get("name", String.class))
+                    .role(payload.get("role", String.class))
+                    .build();
+        } catch (SecurityException e) {
+            throw new JwtAuthenticationException("Invalid Token");
+        } catch (ExpiredJwtException e) {
+            throw new JwtAuthenticationException("Token is Expired");
+        } catch (Exception e) {
+            throw new JwtAuthenticationException("Jwt Error");
+        }
     }
 
     public String generate(String name, String role, Long expiration) {

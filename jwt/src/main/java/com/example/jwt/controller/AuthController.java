@@ -1,6 +1,6 @@
 package com.example.jwt.controller;
 
-import com.example.jwt.dto.JoinDto;
+import com.example.jwt.dto.member.JoinDto;
 import com.example.jwt.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

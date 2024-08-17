@@ -1,6 +1,7 @@
-package com.example.jwt.jwt;
+package com.example.jwt.jwt.filter;
 
-import com.example.jwt.dto.CustomUserDetails;
+import com.example.jwt.dto.member.CustomUserDetails;
+import com.example.jwt.jwt.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,9 +33,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
         // 로그인 성공 시 jwt를 반환하는 로직 작성
-        System.out.println("Login success");
+        logger.info("Login Succeed");
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         String name = userDetails.getUsername();
@@ -42,13 +43,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String token = jwtUtil.generate(name, role, 60 * 60 * 1000L);
 
         response.addHeader("Authorization", "Bearer " + token);
+        response.setContentType("application/json");
         response.getWriter().write("{\"message\": \"Login Success!\"}");
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        System.out.println("Login fail");
-        response.setStatus(401); // 로그인 실패 시 401 코드 반환
+        logger.info("Login Failed");
+
+        response.setStatus(401); // 로그인 실패 시 401 코드
+        response.setContentType("application/json");
         response.getWriter().write("{\"message\": \"Login Failed!\"}");
     }
 
@@ -56,5 +60,4 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected String obtainUsername(HttpServletRequest request) {
         return request.getParameter("name");
     }
-
 }

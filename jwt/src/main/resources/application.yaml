@@ -6,7 +6,7 @@ spring:
     time-zone: Asia/Seoul
 
   datasource:
-    url: jdbc:mysql://localhost:3306/security?useSSL=false&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3306/security?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: root
