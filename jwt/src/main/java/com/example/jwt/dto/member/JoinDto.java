@@ -1,10 +1,19 @@
 package com.example.jwt.dto.member;
 
-import lombok.Getter;
+import lombok.*;
 
-@Getter
 public class JoinDto {
 
-    private String name;
-    private String password;
+    @Getter
+    public static class Request {
+        private String name;
+        private String password;
+    }
+
+    @Builder
+    @Data
+    public static class Response {
+        private Long id;
+        private String name;
+    }
 }

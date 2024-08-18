@@ -15,16 +15,21 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public void join(JoinDto joinDto) {
-        String name = joinDto.getName();
+    public JoinDto.Response join(JoinDto.Request request) {
+        String name = request.getName();
         if (memberRepository.existsByName(name)) {
             throw new DuplicateNameException("Name " + name + " is duplicated");
         }
 
-        memberRepository.save(Member.builder()
-                .name(joinDto.getName())
-                .password(passwordEncoder.encode(joinDto.getPassword()))
+        Member member = memberRepository.save(Member.builder()
+                .name(name)
+                .password(passwordEncoder.encode(request.getPassword()))
                 .role("ROLE_USER")
                 .build());
+
+        return JoinDto.Response.builder()
+                .id(member.getId())
+                .name(member.getName())
+                .build();
     }
 }

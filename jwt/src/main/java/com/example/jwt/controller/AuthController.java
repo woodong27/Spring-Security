@@ -1,9 +1,9 @@
 package com.example.jwt.controller;
 
+import com.example.jwt.dto.Response;
 import com.example.jwt.dto.member.JoinDto;
 import com.example.jwt.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,8 +17,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/join")
-    public ResponseEntity<String> join(@RequestBody JoinDto joinDto) {
-        authService.join(joinDto);
-        return ResponseEntity.ok("Registration Succeed!");
+    public Response<JoinDto.Response> join(@RequestBody JoinDto.Request request) {
+        JoinDto.Response response = authService.join(request);
+        return new Response<>("Registration Succeed", response);
     }
 }

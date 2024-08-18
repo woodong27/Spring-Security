@@ -1,0 +1,27 @@
+version: '3'
+services:
+  db:
+    image: mysql
+    container_name: mysql
+    networks:
+      - jwt
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=security
+    ports:
+      - "3306:3306"
+
+  security-jwt:
+    build: .
+    image: security-jwt
+    container_name: security-jwt
+    depends_on:
+      - db
+    networks:
+      - jwt
+    ports:
+      - "8080:8080"
+    restart: on-failure
+
+networks:
+  jwt:
