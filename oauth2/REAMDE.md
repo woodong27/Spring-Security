@@ -1,0 +1,68 @@
+# OAuth2 + JWT
+
+## 프로젝트 정보
+
+* Spring Boot : 3.3.2
+* JDK : 21
+* Plugins :
+  * Lombok
+  * Spring Security
+  * Spring Web
+  * OAuth2 Client
+  * Spring Data JPA
+  * MySQL Driver
+  * JJWT : 0.12.3
+
+## 소셜 로그인 신청
+
+### 네이버
+
+* 신청 및 설정 : https://developers.naver.com/products/login/api/api.md  
+* 로그인 요청 경로 : /oauth2/authorization/naver
+* 데이터 형식 
+    ```json
+      {
+        "resultCode": 200,
+        "message": "success",
+        "response": {
+          "id" : 1,
+          "name": "이름"
+        }
+      }
+    ```
+
+### 구글
+
+* 신청 및 설정 : https://console.cloud.google.com/welcome/new?project=golden-pillar-433312-j2  
+  위 링크에서 사용자 인증 정보를 검색
+* 데이터 형식
+    ```json
+    {
+      "resultCode": 200,
+      "message": "success",
+      "id": 1,
+      "name": "이름"
+    }
+    ```
+
+## 소셜 로그인 구현 방법
+1. 프론트에서 모든 책임을 맡는다.  
+   프론트에서 유저 정보를 확인하여 서버로 보내면, 서버에서 JWT를 발급해서 반환  
+   프론트에서 보낸 유저 정보의 진위 여부를 확인하는 것이 중요 -> 추가 로직 필요
+2. 프론트와 백엔드가 책임을 나누어 가진다.  
+   참고 - 보안 코드와 토큰 등을 전송하는 방법은 지양해야 함 -> 간단하지만 좋지 않은 방법
+   * 프론트에서 소셜 로그인 서비스의 코드를 받아 서버로 전송  
+     서버에서 코드를 사용해서 토큰/유저 정보를 발급받아 JWT를 생성해서 반환  
+   * 프론트에서 소셜 로그인 서비스의 코드/토큰을 발급받아 서버로 전송
+     서버에서 토큰으로 유저 정보를 발급받아 JWT를 생성해서 반환
+3. 백엔드에서 모든 책임을 맡는다.
+   프론트에서 하이버링크로 백엔드 API GET 요청을 보냄  
+   서버에서 소셜 로그인의 코드 받아 토큰/유저 정보를 확인고 JWT를 발급해서 반환  
+   하이퍼링크로 요청하기 때문에 JWT를 응답으로 반환 받는것이 어려움(방법은 있음)
+
+=> 프론트/백엔드 둘 중 하나에서 모든 책임을 가지는 것이 바람직한 방법
+
+현 프로젝트에서는 백엔드가 모든 책임을 가지는 방법을 연습함
+
+
+   
