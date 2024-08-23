@@ -1,5 +1,6 @@
 package com.example.oauth2.service;
 
+import com.example.oauth2.dto.UserDto;
 import com.example.oauth2.dto.oauth2.CustomOAuth2User;
 import com.example.oauth2.dto.oauth2.GoogleResponse;
 import com.example.oauth2.dto.oauth2.NaverResponse;
@@ -43,6 +44,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                         .role("ROLE_USER")
                         .build()));
 
-        return new CustomOAuth2User(user);
+        return new CustomOAuth2User(UserDto.builder()
+                .name(user.getName())
+                .username(user.getUsername())
+                .role(user.getRole())
+                .build());
     }
 }
