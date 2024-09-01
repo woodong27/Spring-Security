@@ -57,6 +57,7 @@ public class SecurityConfig {
                         .successHandler(successHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/common").permitAll()
+                        .requestMatchers("/api/main/**").hasRole("USER")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
