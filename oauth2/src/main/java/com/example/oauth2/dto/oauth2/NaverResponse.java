@@ -1,13 +1,14 @@
 package com.example.oauth2.dto.oauth2;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class NaverResponse implements OAuth2Response {
 
     private final Map<String, Object> attribute;
+
+    public NaverResponse(Map<String, Object> attribute) {
+        this.attribute = (Map<String, Object>) attribute.get("response");
+    }
 
     @Override
     public String getProvider() {
