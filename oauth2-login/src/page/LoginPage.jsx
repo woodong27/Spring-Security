@@ -1,6 +1,6 @@
 import React from 'react';
 
-const handleKakaoLogin = () => {
+const handleNaverLogin = () => {
     window.location.href = 'http://localhost:8080/oauth2/authorization/naver'
 }
 
@@ -12,8 +12,8 @@ const LoginPage = () => {
     return (
         <div>
             <h1>Social Login</h1>
-            <button onClick={handleKakaoLogin}>
-                Kakao
+            <button onClick={handleNaverLogin}>
+                Naver
             </button>
             <button onClick={handleGoogleLogin}>
                 Google
