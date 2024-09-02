@@ -37,7 +37,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String username = String.format("%s %s", response.getProvider(), response.getProviderId());
         User user = userRepository.findByUsername(username)
-                .orElse(userRepository.save(User.builder()
+                .orElseGet(() -> userRepository.save(User.builder()
                         .username(username)
                         .name(response.getName())
                         .email(response.getEmail())
