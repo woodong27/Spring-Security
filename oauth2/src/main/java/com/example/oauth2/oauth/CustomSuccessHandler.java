@@ -21,20 +21,23 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
      */
 
     private final JwtUtil jwtUtil;
+    private static final String AUTH_HEADER = "Authorization";
+    private static final String REDIRECT_URI = "http://localhost:5173";
+    private static final int EXPIRATION = 24 * 60 * 60; // 하루
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         CustomOAuth2User customUserDetail = (CustomOAuth2User) authentication.getPrincipal();
         String username = customUserDetail.getUsername();
         String role = customUserDetail.getAuthorities().iterator().next().getAuthority();
-        String token = jwtUtil.generate(username, role, 60 * 60 * 1000L);
-        response.addCookie(cookie("Authorization", token));
-        response.sendRedirect("http://localhost:5173");
+        String token = jwtUtil.generate(username, role);
+        response.addCookie(cookie(token));
+        response.sendRedirect(REDIRECT_URI);
     }
 
-    private Cookie cookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(60 * 60 * 60);
+    private Cookie cookie(String value) {
+        Cookie cookie = new Cookie(AUTH_HEADER, value);
+        cookie.setMaxAge(EXPIRATION);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
 
