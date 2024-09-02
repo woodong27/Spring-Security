@@ -4,6 +4,7 @@ import com.example.oauth2.dto.UserDto;
 import com.example.oauth2.dto.oauth2.CustomOAuth2User;
 import com.example.oauth2.entity.User;
 import com.example.oauth2.repository.UserRepository;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,9 +13,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.InternalException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -35,14 +38,20 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (authorization.isPresent()) {
             String token = authorization.get().getValue();
-            CustomOAuth2User oAuth2User = new CustomOAuth2User(UserDto.builder()
-                    .username(jwtUtil.getUsername(token))
-                    .role(jwtUtil.getRole(token))
-                    .build());
-            Authentication authToken = new UsernamePasswordAuthenticationToken(oAuth2User, null, oAuth2User.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authToken);
-
-            filterChain.doFilter(request, response);
+            try {
+                JwtPayload payload = jwtUtil.verify(token);
+                CustomOAuth2User oAuth2User = new CustomOAuth2User(UserDto.builder()
+                        .username(payload.getUsername())
+                        .role(payload.getRole())
+                        .build());
+                Authentication authToken = new UsernamePasswordAuthenticationToken(oAuth2User, null, oAuth2User.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+                filterChain.doFilter(request, response);
+            } catch (SecurityException | ExpiredJwtException e) {
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                response.setContentType("application/json");
+                response.getWriter().write(String.format("{\"path\": \"%s\", \"message\": \"%s\"}", request.getRequestURI(), "Invalid token"));
+            }
         } else {
             filterChain.doFilter(request, response);
         }
