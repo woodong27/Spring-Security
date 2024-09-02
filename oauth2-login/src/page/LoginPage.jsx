@@ -15,7 +15,10 @@ const handleMainPage = () => {
     .then((res) => {
       alert(JSON.stringify(res.data));
     })
-    .catch((e) => alert(e));
+    .catch((e) => {
+      console.log(e.response.data);
+      alert(e.response.data.message);
+    });
 };
 
 const LoginPage = () => {
