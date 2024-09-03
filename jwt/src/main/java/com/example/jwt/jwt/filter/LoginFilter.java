@@ -38,9 +38,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         logger.info("Login Succeed");
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long id = userDetails.getId();
         String name = userDetails.getUsername();
         String role = userDetails.getAuthorities().stream().iterator().next().getAuthority();
-        String token = jwtUtil.generate(name, role, 60 * 60 * 1000L);
+        String token = jwtUtil.generate(id, name, role);
 
         response.addHeader("Authorization", "Bearer " + token);
         response.setContentType("application/json");

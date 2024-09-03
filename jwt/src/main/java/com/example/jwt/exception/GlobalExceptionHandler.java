@@ -1,6 +1,6 @@
-package com.example.jwt.error;
+package com.example.jwt.exception;
 
-import com.example.jwt.error.exception.DuplicateNameException;
+import com.example.jwt.exception.custom.DuplicateNameException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

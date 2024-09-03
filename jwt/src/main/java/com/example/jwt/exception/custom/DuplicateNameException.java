@@ -1,4 +1,4 @@
-package com.example.jwt.error.exception;
+package com.example.jwt.exception.custom;
 
 public class DuplicateNameException extends RuntimeException {
 

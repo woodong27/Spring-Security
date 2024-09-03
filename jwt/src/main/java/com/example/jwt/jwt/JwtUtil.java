@@ -1,10 +1,6 @@
 package com.example.jwt.jwt;
 
-import com.example.jwt.error.exception.JwtAuthenticationException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SecurityException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,6 +14,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private final SecretKey secretKey;
+    private static final Long EXPIRATION = 24 * 60 * 60 * 1000L; // 하루
 
     public JwtUtil(@Value("${jwt.secret}")String secret) {
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
@@ -28,24 +25,27 @@ public class JwtUtil {
             Jws<Claims> jwsClaims = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
             Claims payload = jwsClaims.getPayload();
             return JwtPayload.builder()
+                    .id(payload.get("id", Long.class))
                     .name(payload.get("name", String.class))
                     .role(payload.get("role", String.class))
                     .build();
         } catch (SecurityException e) {
-            throw new JwtAuthenticationException("Invalid Token");
+            throw new JwtException("Invalid Token");
         } catch (ExpiredJwtException e) {
-            throw new JwtAuthenticationException("Token is Expired");
+            throw new JwtException("Token is Expired");
         } catch (Exception e) {
-            throw new JwtAuthenticationException("Jwt Error");
+            throw new JwtException("Jwt Error");
         }
     }
 
-    public String generate(String name, String role, Long expiration) {
+    public String generate(Long id, String name, String role) {
         return Jwts.builder()
+                .claim("id", id)
                 .claim("name", name)
                 .claim("role", role)
+                .issuer("com.example")
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(secretKey)
                 .compact();
     }

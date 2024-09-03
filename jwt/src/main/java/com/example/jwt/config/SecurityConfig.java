@@ -1,10 +1,8 @@
 package com.example.jwt.config;
 
-import com.example.jwt.jwt.filter.JwtExceptionFilter;
 import com.example.jwt.jwt.filter.JwtFilter;
 import com.example.jwt.jwt.JwtUtil;
 import com.example.jwt.jwt.filter.LoginFilter;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +17,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Collections;
 
@@ -75,7 +72,6 @@ public class SecurityConfig {
 
                 // addFilterBefore : 특정 필터의 전에 실행
                 .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
-                .addFilterBefore(new JwtExceptionFilter(), JwtFilter.class)
                 .build();
     }
 

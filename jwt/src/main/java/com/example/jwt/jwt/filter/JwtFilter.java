@@ -4,11 +4,13 @@ import com.example.jwt.dto.member.CustomUserDetails;
 import com.example.jwt.entity.Member;
 import com.example.jwt.jwt.JwtPayload;
 import com.example.jwt.jwt.JwtUtil;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,15 +32,22 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         String token = authorization.split(" ")[1];
-        JwtPayload payload = jwtUtil.verify(token);
-        CustomUserDetails userDetails = new CustomUserDetails(Member.builder()
-                .name(payload.getName())
-                .password("password")
-                .role(payload.getRole())
-                .build());
+        try {
+            JwtPayload payload = jwtUtil.verify(token);
+            CustomUserDetails userDetails = new CustomUserDetails(Member.builder()
+                    .id(payload.getId())
+                    .name(payload.getName())
+                    .password("password")
+                    .role(payload.getRole())
+                    .build());
 
-        Authentication authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()); // 스프링 시큐리티 인증 토큰 생성
-        SecurityContextHolder.getContext().setAuthentication(authToken); // 세션에 현재 사용자를 등록
-        filterChain.doFilter(request, response);
+            Authentication authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()); // 스프링 시큐리티 인증 토큰 생성
+            SecurityContextHolder.getContext().setAuthentication(authToken); // 세션에 현재 사용자를 등록
+            filterChain.doFilter(request, response);
+        } catch (JwtException e) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
+            response.getWriter().write(String.format("{\"path\": \"%s\", \"message\": \"%s\"}", request.getRequestURI(), e.getMessage()));
+        }
     }
 }

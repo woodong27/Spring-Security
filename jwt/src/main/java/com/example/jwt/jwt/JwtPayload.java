@@ -7,6 +7,7 @@ import lombok.Getter;
 @Builder
 public class JwtPayload {
 
+    private Long id;
     private String name;
     private String role;
 }

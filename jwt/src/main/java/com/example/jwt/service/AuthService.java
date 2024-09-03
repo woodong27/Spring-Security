@@ -2,7 +2,7 @@ package com.example.jwt.service;
 
 import com.example.jwt.dto.member.JoinDto;
 import com.example.jwt.entity.Member;
-import com.example.jwt.error.exception.DuplicateNameException;
+import com.example.jwt.exception.custom.DuplicateNameException;
 import com.example.jwt.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
