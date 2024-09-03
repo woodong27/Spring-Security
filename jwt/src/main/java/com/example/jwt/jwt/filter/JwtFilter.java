@@ -4,13 +4,12 @@ import com.example.jwt.dto.member.CustomUserDetails;
 import com.example.jwt.entity.Member;
 import com.example.jwt.jwt.JwtPayload;
 import com.example.jwt.jwt.JwtUtil;
-import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,7 +24,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authorization = request.getHeader("Authorization");
+        String authorization = request.getHeader(JwtUtil.AUTH_HEADER);
         if (authorization == null || !authorization.startsWith("Bearer")) {
             filterChain.doFilter(request, response);
             return;
@@ -34,6 +33,8 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = authorization.split(" ")[1];
         try {
             JwtPayload payload = jwtUtil.verify(token);
+            if (!payload.getCategory().equals("access")) throw new Exception("Invalid token");
+
             CustomUserDetails userDetails = new CustomUserDetails(Member.builder()
                     .id(payload.getId())
                     .name(payload.getName())
@@ -44,10 +45,14 @@ public class JwtFilter extends OncePerRequestFilter {
             Authentication authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()); // 스프링 시큐리티 인증 토큰 생성
             SecurityContextHolder.getContext().setAuthentication(authToken); // 세션에 현재 사용자를 등록
             filterChain.doFilter(request, response);
-        } catch (JwtException e) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        } catch (ExpiredJwtException e) {  // 토큰이 만료된 경우 -> refresh로 재발급 필요
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            response.getWriter().write(String.format("{\"path\": \"%s\", \"message\": \"%s\"}", request.getRequestURI(), e.getMessage()));
+            response.getWriter().write("{\"message\": \"Access Token Expired\"}");
+        } catch (Exception e) {  // 이외의 경우
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write(String.format("{\"message\": \"%s\"}", e.getMessage()));
         }
     }
 }

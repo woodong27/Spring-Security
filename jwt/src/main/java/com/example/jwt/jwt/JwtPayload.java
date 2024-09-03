@@ -8,6 +8,7 @@ import lombok.Getter;
 public class JwtPayload {
 
     private Long id;
+    private String category;
     private String name;
     private String role;
 }

@@ -4,6 +4,7 @@ import com.example.jwt.dto.member.CustomUserDetails;
 import com.example.jwt.jwt.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -41,18 +42,31 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Long id = userDetails.getId();
         String name = userDetails.getUsername();
         String role = userDetails.getAuthorities().stream().iterator().next().getAuthority();
-        String token = jwtUtil.generate(id, name, role);
+        String accessToken = jwtUtil.generate("access", id, name, role, JwtUtil.ACCESS_EXPIRATION);
+        String refreshToken = jwtUtil.generate("refresh", id, name, role, JwtUtil.REFRESH_EXPIRATION);
 
-        response.addHeader("Authorization", "Bearer " + token);
+        response.addHeader(JwtUtil.AUTH_HEADER, accessToken);  // 헤더로 Access Token 전달
+        response.addCookie(cookie(refreshToken));  // 쿠키로 Refresh Token 전달
+        response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json");
         response.getWriter().write("{\"message\": \"Login Success!\"}");
+    }
+
+    private Cookie cookie(String token) {
+        Cookie cookie = new Cookie(JwtUtil.AUTH_HEADER, token);
+        cookie.setPath("/");
+        cookie.setSecure(true);
+        cookie.setMaxAge((int) (JwtUtil.REFRESH_EXPIRATION / 1000));
+        cookie.setHttpOnly(true);
+
+        return cookie;
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         logger.info("Login Failed");
 
-        response.setStatus(401); // 로그인 실패 시 401 코드
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 로그인 실패 시 401 코드
         response.setContentType("application/json");
         response.getWriter().write("{\"message\": \"Login Failed!\"}");
     }

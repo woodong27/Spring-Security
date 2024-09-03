@@ -38,7 +38,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                // api 방식은 session이 stateless이기 때문에 csrf 방어 필요 없음
+                // api 방식은 session stateless
                 .csrf(AbstractHttpConfigurer::disable)
 
                 // jwt을 쓰기 때문에 비활성화
@@ -50,17 +50,17 @@ public class SecurityConfig {
                 // Cors 설정
                 .cors((cors -> cors.configurationSource(request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
-                    configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                    configuration.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
                     configuration.setAllowedMethods(Collections.singletonList("*"));
                     configuration.setAllowCredentials(true);
                     configuration.setAllowedHeaders(Collections.singletonList("*"));
                     configuration.setMaxAge(3600L);
-                    configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+                    configuration.setExposedHeaders(Collections.singletonList(JwtUtil.AUTH_HEADER));
                     return configuration;
                 })))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/common", "/api/auth/login", "/api/auth/join").permitAll()
+                        .requestMatchers("/api/common", "/api/auth/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
 

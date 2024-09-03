@@ -6,8 +6,8 @@ spring:
     time-zone: Asia/Seoul
 
   datasource:
-#    url: jdbc:mysql://localhost:3306/security?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul # 로컬 실행용
-    url: jdbc:mysql://mysql:3306/security?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul # docker compose 용
+    url: jdbc:mysql://localhost:3306/security?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul # 로컬 실행용
+#    url: jdbc:mysql://mysql:3306/security?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul # docker compose 용
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: root
