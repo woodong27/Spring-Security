@@ -7,6 +7,7 @@ import lombok.Getter;
 @Builder
 public class JwtPayload {
 
-    private String username;
+    private Long id;
+    private String email;
     private String role;
 }

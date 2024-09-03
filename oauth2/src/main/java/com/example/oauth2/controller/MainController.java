@@ -14,12 +14,14 @@ import java.util.Map;
 public class MainController {
 
     @GetMapping
-    public ResponseEntity<Map<String, String>> mainPage() {
+    public ResponseEntity<Map<String, Object>> mainPage() {
         String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
                 .iterator().next().getAuthority();
 
-        System.out.println(((CustomOAuth2User)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername());
-
-        return ResponseEntity.ok(Map.of("role", role));
+        CustomOAuth2User oAuth2User = (CustomOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ResponseEntity.ok().body(Map.of(
+                "id", oAuth2User.getId(),
+                "email", oAuth2User.getEmail(),
+                "role", role));
     }
 }

@@ -28,9 +28,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         CustomOAuth2User customUserDetail = (CustomOAuth2User) authentication.getPrincipal();
-        String username = customUserDetail.getUsername();
         String role = customUserDetail.getAuthorities().iterator().next().getAuthority();
-        String token = jwtUtil.generate(username, role);
+        Long id = customUserDetail.getId();
+        String email = customUserDetail.getEmail();
+        String token = jwtUtil.generate(id, email,role);
         response.addCookie(cookie(token));
         response.sendRedirect(REDIRECT_URI);
     }

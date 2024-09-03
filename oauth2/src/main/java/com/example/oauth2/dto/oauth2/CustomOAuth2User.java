@@ -1,7 +1,6 @@
 package com.example.oauth2.dto.oauth2;
 
 import com.example.oauth2.dto.UserDto;
-import com.example.oauth2.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -32,7 +31,11 @@ public class CustomOAuth2User implements OAuth2User {
         return userDto.getName();
     }
 
-    public String getUsername() {
-        return userDto.getUsername();
+    public Long getId() {
+        return userDto.getId();
+    }
+
+    public String getEmail() {
+        return userDto.getEmail();
     }
 }

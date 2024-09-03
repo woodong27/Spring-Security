@@ -1,8 +1,6 @@
 package com.example.oauth2.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -22,18 +20,29 @@ public class JwtUtil {
     }
 
     public JwtPayload verify(String token) {
-        Jws<Claims> jwsClaims = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
-        Claims payload = jwsClaims.getPayload();
-        return JwtPayload.builder()
-                .username(payload.get("username", String.class))
-                .role(payload.get("role", String.class))
-                .build();
+        try {
+            Claims payload = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
+            return JwtPayload.builder()
+                    .id(payload.get("id", Long.class))
+                    .email(payload.get("email", String.class))
+                    .role(payload.get("role", String.class))
+                    .build();
+        } catch (SecurityException e) {
+            throw new JwtException("Invalid token");
+        } catch (ExpiredJwtException e) {
+            throw new JwtException("Token is expired");
+        } catch (Exception e) {
+            throw new JwtException(e.getMessage());
+        }
     }
 
-    public String generate(String username, String role) {
+    public String generate(Long id, String email, String role) {
         return Jwts.builder()
-                .claim("username", username)
+                .claim("id", id)
                 .claim("role", role)
+                .claim("email", email)
+                .subject(id.toString())
+                .issuer("com.example")
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(secretKey)
