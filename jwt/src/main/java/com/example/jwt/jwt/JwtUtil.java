@@ -1,6 +1,7 @@
 package com.example.jwt.jwt;
 
 import io.jsonwebtoken.*;
+import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -43,5 +44,15 @@ public class JwtUtil {
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(secretKey)
                 .compact();
+    }
+
+    public static Cookie cookie(String token) {
+        Cookie cookie = new Cookie(AUTH_HEADER, token);
+        cookie.setPath("/");
+        cookie.setSecure(true);
+        cookie.setMaxAge((int) (REFRESH_EXPIRATION / 1000));
+        cookie.setHttpOnly(true);
+
+        return cookie;
     }
 }

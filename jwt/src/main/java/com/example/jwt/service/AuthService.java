@@ -16,7 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.Optional;
+import static com.example.jwt.jwt.JwtUtil.*;
 
 @Service
 @RequiredArgsConstructor
@@ -45,19 +45,18 @@ public class AuthService {
     }
 
     public String reissue(HttpServletRequest request, HttpServletResponse response) {
-        Optional<Cookie> refresh = Arrays.stream(request.getCookies())
-                .filter(cookie -> cookie.getName().equals(JwtUtil.AUTH_HEADER))
-                .findFirst();
-
-        if (refresh.isEmpty()) {
-            throw new ReissueException("Invalid refresh token");
-        }
+        Cookie refresh = Arrays.stream(request.getCookies())
+                .filter(cookie -> cookie.getName().equals(AUTH_HEADER))
+                .findFirst()
+                .orElseThrow(() -> new ReissueException("Refresh token not found"));
 
         try {
-            JwtPayload payload = jwtUtil.verify(refresh.get().getValue());
+            JwtPayload payload = jwtUtil.verify(refresh.getValue());
             if (!payload.getCategory().equals("refresh")) throw new Exception("Invalid refresh token");
-            String accessToken = jwtUtil.generate("access", payload.getId(), payload.getName(), payload.getRole(), JwtUtil.ACCESS_EXPIRATION);
-            response.setHeader(JwtUtil.AUTH_HEADER, accessToken);
+            String accessToken = jwtUtil.generate("access", payload.getId(), payload.getName(), payload.getRole(), ACCESS_EXPIRATION);
+            String refreshToken = jwtUtil.generate("refresh", payload.getId(), payload.getName(), payload.getRole(), REFRESH_EXPIRATION);
+            response.setHeader(AUTH_HEADER, accessToken);
+            response.addCookie(cookie(refreshToken));
             return "Access token reissued";
         } catch (ExpiredJwtException e) {
             throw new ReissueException("Refresh token expired");

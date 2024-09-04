@@ -4,7 +4,6 @@ import com.example.jwt.dto.Response;
 import com.example.jwt.dto.member.JoinDto;
 import com.example.jwt.exception.custom.ReissueException;
 import com.example.jwt.service.AuthService;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
