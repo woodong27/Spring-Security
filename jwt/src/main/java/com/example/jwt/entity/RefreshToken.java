@@ -3,7 +3,6 @@ package com.example.jwt.entity;
 import jakarta.persistence.Id;
 import lombok.*;
 import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.TimeToLive;
 
 @Getter
 @RedisHash(value = "refreshToken", timeToLive = 24 * 60 * 60)

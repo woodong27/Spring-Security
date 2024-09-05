@@ -2,7 +2,6 @@ package com.example.jwt.service;
 
 import com.example.jwt.dto.member.JoinDto;
 import com.example.jwt.entity.Member;
-import com.example.jwt.entity.RefreshToken;
 import com.example.jwt.exception.custom.DuplicateNameException;
 import com.example.jwt.exception.custom.ReissueException;
 import com.example.jwt.jwt.JwtPayload;
@@ -55,9 +54,9 @@ public class AuthService {
         String token = refresh.getValue();
         try {
             JwtPayload payload = jwtUtil.verify(token);
+            if (!payload.getCategory().equals("refresh")) throw new Exception("Invalid refresh token");
             Long id = payload.getId();
             if (!redisService.exist(id, token)) throw new Exception("Refresh token not found");
-            if (!payload.getCategory().equals("refresh")) throw new Exception("Invalid refresh token");
             String accessToken = jwtUtil.generate("access", id, payload.getName(), payload.getRole(), ACCESS_EXPIRATION);
             String refreshToken = jwtUtil.generate("refresh", id, payload.getName(), payload.getRole(), REFRESH_EXPIRATION_MILLI);
             redisService.delete(id);

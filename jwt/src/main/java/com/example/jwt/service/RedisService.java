@@ -26,6 +26,7 @@ public class RedisService {
                 .orElse(false);
     }
 
+    @Transactional
     public void delete(Long id) {
         try {
             repository.deleteById(id);

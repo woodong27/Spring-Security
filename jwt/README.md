@@ -15,10 +15,18 @@
 ## DB(MySQL)
 
 ```bash
+# mysql
 docker run --name mysql -e MYSQL_ROOT_PASSWORD=root -d -p 3306:3306 mysql
 
 docker exec -it mysql bash
 mysql -u root -p // 이후 root계정 패스워드 입력
 
 create database security;
+
+# redis
+docker run --name redis -d -p 3306:3306 redis
+
+docker exec -it redis redis-cli
+keys *
+HGETALL {key}
 ```

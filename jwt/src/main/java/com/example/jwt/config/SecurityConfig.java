@@ -3,6 +3,7 @@ package com.example.jwt.config;
 import com.example.jwt.jwt.filter.JwtFilter;
 import com.example.jwt.jwt.JwtUtil;
 import com.example.jwt.jwt.filter.LoginFilter;
+import com.example.jwt.jwt.filter.CustomLogoutFilter;
 import com.example.jwt.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +18,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Collections;
@@ -75,6 +77,7 @@ public class SecurityConfig {
 
                 // addFilterBefore : 특정 필터의 전에 실행
                 .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, redisService), LogoutFilter.class)
                 .build();
     }
 
