@@ -2,6 +2,7 @@ package com.example.jwt.jwt.filter;
 
 import com.example.jwt.dto.member.CustomUserDetails;
 import com.example.jwt.jwt.JwtUtil;
+import com.example.jwt.service.RedisService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,6 +22,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private final RedisService redisService;
     {setFilterProcessesUrl("/api/auth/login");}
 
     @Override
@@ -42,7 +44,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String name = userDetails.getUsername();
         String role = userDetails.getAuthorities().stream().iterator().next().getAuthority();
         String accessToken = jwtUtil.generate("access", id, name, role, ACCESS_EXPIRATION);
-        String refreshToken = jwtUtil.generate("refresh", id, name, role, REFRESH_EXPIRATION);
+        String refreshToken = jwtUtil.generate("refresh", id, name, role, REFRESH_EXPIRATION_MILLI);
+        redisService.save(id, refreshToken);
 
         response.addHeader(AUTH_HEADER, accessToken);  // 헤더로 Access Token 전달
         response.addCookie(cookie(refreshToken));  // 쿠키로 Refresh Token 전달

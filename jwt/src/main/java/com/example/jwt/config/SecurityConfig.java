@@ -3,6 +3,7 @@ package com.example.jwt.config;
 import com.example.jwt.jwt.filter.JwtFilter;
 import com.example.jwt.jwt.JwtUtil;
 import com.example.jwt.jwt.filter.LoginFilter;
+import com.example.jwt.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,7 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtil jwtUtil;
+    private final RedisService redisService;
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -69,7 +71,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // addFilterAt : 특정 필터를 선택해서 원하는 custom 필터로 대체
-                .addFilterAt(new LoginFilter(jwtUtil, authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(new LoginFilter(jwtUtil, authenticationManager(authenticationConfiguration), redisService), UsernamePasswordAuthenticationFilter.class)
 
                 // addFilterBefore : 특정 필터의 전에 실행
                 .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)

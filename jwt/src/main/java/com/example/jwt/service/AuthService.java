@@ -2,6 +2,7 @@ package com.example.jwt.service;
 
 import com.example.jwt.dto.member.JoinDto;
 import com.example.jwt.entity.Member;
+import com.example.jwt.entity.RefreshToken;
 import com.example.jwt.exception.custom.DuplicateNameException;
 import com.example.jwt.exception.custom.ReissueException;
 import com.example.jwt.jwt.JwtPayload;
@@ -25,6 +26,7 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final RedisService redisService;
 
     public JoinDto.Response join(JoinDto.Request request) {
         String name = request.getName();
@@ -50,11 +52,17 @@ public class AuthService {
                 .findFirst()
                 .orElseThrow(() -> new ReissueException("Refresh token not found"));
 
+        String token = refresh.getValue();
         try {
-            JwtPayload payload = jwtUtil.verify(refresh.getValue());
+            JwtPayload payload = jwtUtil.verify(token);
+            Long id = payload.getId();
+            if (!redisService.exist(id, token)) throw new Exception("Refresh token not found");
             if (!payload.getCategory().equals("refresh")) throw new Exception("Invalid refresh token");
-            String accessToken = jwtUtil.generate("access", payload.getId(), payload.getName(), payload.getRole(), ACCESS_EXPIRATION);
-            String refreshToken = jwtUtil.generate("refresh", payload.getId(), payload.getName(), payload.getRole(), REFRESH_EXPIRATION);
+            String accessToken = jwtUtil.generate("access", id, payload.getName(), payload.getRole(), ACCESS_EXPIRATION);
+            String refreshToken = jwtUtil.generate("refresh", id, payload.getName(), payload.getRole(), REFRESH_EXPIRATION_MILLI);
+            redisService.delete(id);
+            redisService.save(id, refreshToken);
+
             response.setHeader(AUTH_HEADER, accessToken);
             response.addCookie(cookie(refreshToken));
             return "Access token reissued";

@@ -15,7 +15,8 @@ public class JwtUtil {
 
     private final SecretKey secretKey;
     public static final String AUTH_HEADER = "Authorization";
-    public static final Long REFRESH_EXPIRATION = 24 * 60 * 60 * 1000L; // 하루
+    public static final Long REFRESH_EXPIRATION_MILLI = 24 * 60 * 60 * 1000L; // 하루(밀리초)
+    public static final int REFRESH_EXPIRATION_SECOND = 24 * 60 * 60; // 하루(초)
     public static final Long ACCESS_EXPIRATION = 10 * 60 * 1000L; // 10분
 
     public JwtUtil(@Value("${jwt.secret}")String secret) {
@@ -50,7 +51,7 @@ public class JwtUtil {
         Cookie cookie = new Cookie(AUTH_HEADER, token);
         cookie.setPath("/");
         cookie.setSecure(true);
-        cookie.setMaxAge((int) (REFRESH_EXPIRATION / 1000));
+        cookie.setMaxAge(REFRESH_EXPIRATION_SECOND);
         cookie.setHttpOnly(true);
 
         return cookie;
