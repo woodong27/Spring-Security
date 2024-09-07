@@ -24,9 +24,9 @@ mysql -u root -p // 이후 root계정 패스워드 입력
 create database security;
 
 # redis
-docker run --name redis -d -p 3306:3306 redis
+docker run --name redis -d -p 6379:6379 redis
 
 docker exec -it redis redis-cli
 keys *
-HGETALL {key}
+HGETALL ${key}
 ```
