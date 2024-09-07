@@ -4,10 +4,12 @@ import com.example.jwt.entity.RefreshToken;
 import com.example.jwt.repository.RefreshTokenRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RedisService {
 
     private final RefreshTokenRepository repository;
@@ -31,7 +33,7 @@ public class RedisService {
         try {
             repository.deleteById(id);
         } catch (Exception e) {
-            System.out.println("Token does not exists");
+            log.warn("Failed to delete refresh token(does not exist)");
         }
     }
 }

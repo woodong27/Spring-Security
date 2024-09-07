@@ -1,9 +1,9 @@
 package com.example.jwt.config;
 
+import com.example.jwt.jwt.handler.CustomLogoutSuccessHandler;
 import com.example.jwt.jwt.filter.JwtFilter;
 import com.example.jwt.jwt.JwtUtil;
 import com.example.jwt.jwt.filter.LoginFilter;
-import com.example.jwt.jwt.filter.CustomLogoutFilter;
 import com.example.jwt.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +18,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Collections;
@@ -32,6 +31,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtil jwtUtil;
     private final RedisService redisService;
+    private final CustomLogoutSuccessHandler logoutSuccessHandler;
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -64,6 +64,12 @@ public class SecurityConfig {
                     return configuration;
                 })))
 
+                .logout(logout -> logout
+                        .logoutUrl("/api/auth/logout")
+                        .deleteCookies(JwtUtil.AUTH_HEADER)
+                        .invalidateHttpSession(true)
+                        .logoutSuccessHandler(logoutSuccessHandler))
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/common", "/api/auth/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -77,7 +83,6 @@ public class SecurityConfig {
 
                 // addFilterBefore : 특정 필터의 전에 실행
                 .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
-                .addFilterBefore(new CustomLogoutFilter(jwtUtil, redisService), LogoutFilter.class)
                 .build();
     }
 
