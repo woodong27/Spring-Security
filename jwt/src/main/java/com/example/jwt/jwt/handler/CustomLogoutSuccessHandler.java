@@ -34,10 +34,8 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
             if (refresh.isPresent()) {
                 try {
                     JwtPayload payload = jwtUtil.verify(refresh.get().getValue());
-                    if (payload.getCategory().equals("refresh")) {
-                        redisService.delete(payload.getId());
-                        log.info("Refresh token deleted");
-                    }
+                    redisService.delete(payload.getId());
+                    log.info("Refresh token deleted");
                 } catch (Exception ignored) {}
             }
         }
